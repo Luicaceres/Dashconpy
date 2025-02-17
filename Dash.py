@@ -160,7 +160,7 @@ styles = {
         'left': '0px'  # Move on-screen
     }
 }
-
+#para git 
 
 # Diseño de la aplicación
 app.layout = dbc.Container([
