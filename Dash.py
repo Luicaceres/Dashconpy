@@ -1,9 +1,27 @@
+import os
+from dotenv import load_dotenv
+import oracledb
 import dash
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 import dash_daq as daq
-from dash.dependencies import Input, Output, State
 from callbacks import register_callbacks
+
+# Paso 1: Cargar variables de entorno desde el archivo .env
+load_dotenv()
+
+# Obtener credenciales de las variables de entorno
+username = os.getenv('ORACLE_USER')
+password = os.getenv('ORACLE_PASSWORD')
+dsn = os.getenv('ORACLE_DSN')
+
+# Conectar a la base de datos
+try:
+    connection = oracledb.connect(user=username, password=password, dsn=dsn)
+    cursor = connection.cursor()
+    print("Conexión a la base de datos establecida correctamente.")
+except Exception as e:
+    print(f"Error al conectar a la base de datos: {e}")
 
 # Crear una aplicación Dash con Bootstrap y estilos personalizados
 app = dash.Dash(__name__, external_stylesheets=[
@@ -49,25 +67,14 @@ navbar = dbc.Navbar(
     fixed="top"  # Asegúrate de que la barra de navegación esté fija en la parte superior
 )
 
-# Callback para manejar el colapso del navbar
-@app.callback(
-    Output("navbar-collapse", "is_open"),
-    [Input("navbar-toggler", "n_clicks")],
-    [Input("toggle-button", "n_clicks")],
-    [State("navbar-collapse", "is_open")]
-)
-def toggle_navbar_collapse(n, t, is_open):
-    if n or t:
-        return not is_open
-    return is_open
-
+# Diseño de la aplicación
 # Diseño de la aplicación
 app.layout = dbc.Container([
     navbar,
     html.Div([
         html.Div([
             html.H4("Configuración Gráfico 1"),
-            dcc.Dropdown(id='dropdown-1', options=dropdown_options, value='line-chart', clearable=False),
+            dcc.Dropdown(id='dropdown-1', options=dropdown_options, value='bar-chart', clearable=False),
             daq.ColorPicker(id='color-picker-1', label='Selecciona un color', value=dict(hex='#FF0000')),
             html.Hr(),
             html.H4("Configuración Gráfico 2"),
@@ -99,12 +106,23 @@ app.layout = dbc.Container([
         step=1,
         value=1,
         marks={i: str(i) for i in range(1, 11)}
+    ),
+    
+    # Añadir un componente de intervalo para actualizar los gráficos
+    dcc.Interval(
+        id='interval-component',
+        interval=60000,  # Actualiza cada minuto
+        n_intervals=0
     )
 ], fluid=True, style={'marginTop': '60px'})  # Asegúrate de que los componentes se desplazan hacia abajo
 
 # Registrar los callbacks
-register_callbacks(app)
+register_callbacks(app, cursor)
 
 # Ejecutar la aplicación
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+# Cerrar la conexión cuando sea necesario
+cursor.close()
+connection.close()
