@@ -1,0 +1,60 @@
+#sidebar {
+    position: fixed;
+    top: 56px; /* Ajusta según la altura de la barra de navegación */
+    left: -260px;
+    width: 250px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    height: calc(100vh - 56px); /* Ajusta según la altura de la barra de navegación */
+    overflow-y: auto;
+    transition: left 0.3s ease-in-out;
+    display: none; /* Asegúrate de que el sidebar esté oculto por defecto */
+    z-index: 1000; /* Asegura que el sidebar esté encima de los gráficos */
+}
+
+#sidebar_visible {
+    left: 0px;
+    display: block; /* Asegúrate de que el sidebar esté visible cuando se active */
+}
+
+#graphs-container {
+    display: flex;
+    flex-wrap: wrap; /* Asegura que los gráficos se envuelvan en nuevas líneas */
+    justify-content: space-between; /* Distribuye los gráficos uniformemente */
+    transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+}
+
+.graph-col {
+    flex: 0 0 48%; /* Ocupa el 48% del ancho menos márgenes en pantallas grandes */
+    max-width: 100%; /* Asegura que los gráficos no se estiren más allá del 48% */
+    margin-bottom: 20px; /* Añade espaciado entre gráficos */
+    /* border: 2px solid red; /* Agrega un borde rojo alrededor de cada gráfico para ver el espacio que ocupan */
+}
+
+/* Media query para dispositivos móviles */
+@media (max-width: 768px) {
+    .graph-col {
+        flex: 0 0 100%; /* Ocupa el 100% del ancho en dispositivos móviles */
+        max-width: 100%; /* Asegura que el gráfico no se deforme */
+        margin: 20px 0; /* Añade márgenes verticales entre gráficos en móviles */
+    }
+
+    #graphs-container {
+        flex-direction: column; /* Asegura que los gráficos se apilen verticalmente */
+    }
+}
+
+#toggle-button {
+    position: relative;
+    left: 0;
+    top: 0;
+    margin: auto;
+    width: 100%;
+    text-align: center;
+}
+
+#sidebar {
+    top: 56px; /* Ajusta según la altura de la barra de navegación */
+    width: 100%;
+    left: 0 !important;
+}

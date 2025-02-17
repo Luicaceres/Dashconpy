@@ -9,23 +9,27 @@ def register_callbacks(app):
     )
     def toggle_sidebar(n_clicks, sidebar_style, graphs_style):
         if sidebar_style is None:
-            sidebar_style = {'position': 'fixed', 'top': '0', 'left': '-260px', 'width': '250px', 'padding': '10px', 'background-color': '#f8f9fa', 'height': '100vh', 'overflow-y': 'auto', 'transition': 'left 0.3s ease-in-out'}
+            sidebar_style = {'display': 'none', 'position': 'fixed', 'top': '56px', 'left': '-260px', 'width': '250px', 'padding': '10px', 'background-color': '#f8f9fa', 'height': 'calc(100vh - 56px)', 'overflow-y': 'auto', 'transition': 'left 0.3s ease-in-out'}
         if graphs_style is None:
-            graphs_style = {'width': '100%', 'transition': 'width 0.3s ease-in-out'}
-        
-        if n_clicks % 2 == 0:
-            sidebar_style['left'] = '0px'
-            graphs_style.update({'width': 'calc(100% - 260px)', 'transition': 'width 0.3s ease-in-out', 'margin-left': '260px'})
-        else:
+            graphs_style = {'width': '100%', 'margin-left': '0'}
+
+        # Ajuste para asegurar que el sidebar y los gráficos se ajusten correctamente
+        if n_clicks is None or n_clicks % 2 == 0:
+            sidebar_style['display'] = 'none'
             sidebar_style['left'] = '-260px'
-            graphs_style.update({'width': '100%', 'transition': 'width 0.3s ease-in-out', 'margin-left': '0'})
+            graphs_style = {'width': '100%', 'margin-left': '0'}
+        else:
+            sidebar_style['display'] = 'block'
+            sidebar_style['left'] = '0px'
+            graphs_style = {'width': 'calc(100% - 260px)', 'margin-left': '260px'}
+
         return sidebar_style, graphs_style
 
     @app.callback(
         [Output('graph-1', 'figure'), Output('graph-2', 'figure'), Output('graph-3', 'figure'), Output('graph-4', 'figure')],
         [Input('dropdown-1', 'value'), Input('dropdown-2', 'value'), Input('dropdown-3', 'value'), Input('dropdown-4', 'value'),
-        Input('color-picker-1', 'value'), Input('color-picker-2', 'value'), Input('color-picker-3', 'value'), Input('color-picker-4', 'value'),
-        Input('work-slider', 'value')]
+         Input('color-picker-1', 'value'), Input('color-picker-2', 'value'), Input('color-picker-3', 'value'), Input('color-picker-4', 'value'),
+         Input('work-slider', 'value')]
     )
     def update_graphs(dropdown1, dropdown2, dropdown3, dropdown4, color1, color2, color3, color4, slider_value):
         adjusted_df = df.copy()

@@ -2,10 +2,15 @@ import dash
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 import dash_daq as daq
+from dash.dependencies import Input, Output, State
 from callbacks import register_callbacks
 
-# Crear una aplicación Dash con Bootstrap
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+# Crear una aplicación Dash con Bootstrap y estilos personalizados
+app = dash.Dash(__name__, external_stylesheets=[
+    dbc.themes.BOOTSTRAP, 
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",  # Importa FontAwesome Icons
+    "https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"  # Importa Bootstrap Icons
+], assets_folder='assets')  # Asegúrate de que la carpeta 'assets' exista
 
 # Lista de opciones para el menú desplegable
 dropdown_options = [
@@ -24,29 +29,41 @@ dropdown_options = [
     {'label': 'Gráfico de Sunburst', 'value': 'sunburst'}
 ]
 
-# Estilos CSS para el sidebar y la animación
-# Estilos CSS para el sidebar y la animación (continuación)
-styles = {
-    'sidebar': {
-        'position': 'fixed',
-        'top': '0',
-        'left': '-260px',
-        'width': '250px',
-        'padding': '10px',
-        'background-color': '#f8f9fa',
-        'height': '100vh',
-        'overflow-y': 'auto',
-        'transition': 'left 0.3s ease-in-out'
-    },
-    'sidebar_visible': {
-        'left': '0px'
-    }
-}
+# Diseño de la barra de navegación
+navbar = dbc.Navbar(
+    dbc.Container([
+        dbc.NavbarBrand("Dashboard Interactivo 2x2", className="ml-2"),
+        dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
+        dbc.Collapse(
+            dbc.Nav([
+                dbc.NavItem(dbc.NavLink(html.I(className="bi bi-gear-fill"), id="toggle-button", n_clicks=0, style={"fontSize": "1.5rem", "padding": "0", "width": "auto"})),
+            ], className="ml-auto", navbar=True),
+            id="navbar-collapse",
+            is_open=False,  # Inicialmente cerrado
+            navbar=True,
+        ),
+    ]),
+    color="dark",
+    dark=True,
+    className="mb-4",
+    fixed="top"  # Asegúrate de que la barra de navegación esté fija en la parte superior
+)
+
+# Callback para manejar el colapso del navbar
+@app.callback(
+    Output("navbar-collapse", "is_open"),
+    [Input("navbar-toggler", "n_clicks")],
+    [Input("toggle-button", "n_clicks")],
+    [State("navbar-collapse", "is_open")]
+)
+def toggle_navbar_collapse(n, t, is_open):
+    if n or t:
+        return not is_open
+    return is_open
 
 # Diseño de la aplicación
 app.layout = dbc.Container([
-    html.H1('Dashboard Interactivo 2x2', style={'padding-left': '260px', 'padding-top': '10px'}),
-    html.Button('Mostrar/Ocultar Configuración', id='toggle-button', n_clicks=0, style={'position': 'absolute', 'left': '10px', 'top': '10px', 'z-index': '1'}),
+    navbar,
     html.Div([
         html.Div([
             html.H4("Configuración Gráfico 1"),
@@ -64,20 +81,14 @@ app.layout = dbc.Container([
             html.H4("Configuración Gráfico 4"),
             dcc.Dropdown(id='dropdown-4', options=dropdown_options, value='pie-chart', clearable=False),
             daq.ColorPicker(id='color-picker-4', label='Selecciona un color', value=dict(hex='#FFA500')),
-        ], id='sidebar', style=styles['sidebar']),
+        ], id='sidebar', style={'display': 'none'}),
     ], id='sidebar-container'),
-    
-    dbc.Row([
-        dbc.Col([
-            dbc.Row([
-                dbc.Col(dcc.Graph(id='graph-1', style={'width': '100%'}), width=6),
-                dbc.Col(dcc.Graph(id='graph-2', style={'width': '100%'}), width=6)
-            ], align="center"),
-            dbc.Row([
-                dbc.Col(dcc.Graph(id='graph-3', style={'width': '100%'}), width=6),
-                dbc.Col(dcc.Graph(id='graph-4', style={'width': '100%'}), width=6)
-            ], align="center")
-        ], id='graphs-container', width=12)
+
+    dbc.Row(id='graphs-container', children=[
+        dbc.Col(dcc.Graph(id='graph-1', className='graph-col'), width=6, xs=12, sm=12, md=6, lg=6, xl=6),
+        dbc.Col(dcc.Graph(id='graph-2', className='graph-col'), width=6, xs=12, sm=12, md=6, lg=6, xl=6),
+        dbc.Col(dcc.Graph(id='graph-3', className='graph-col'), width=6, xs=12, sm=12, md=6, lg=6, xl=6),
+        dbc.Col(dcc.Graph(id='graph-4', className='graph-col'), width=6, xs=12, sm=12, md=6, lg=6, xl=6),
     ]),
 
     # Slider para ajustar un parámetro (por ejemplo, multiplicar los valores de 'Trabajo')
@@ -89,7 +100,7 @@ app.layout = dbc.Container([
         value=1,
         marks={i: str(i) for i in range(1, 11)}
     )
-], fluid=True, style={'padding-left': '260px'})
+], fluid=True, style={'marginTop': '60px'})  # Asegúrate de que los componentes se desplazan hacia abajo
 
 # Registrar los callbacks
 register_callbacks(app)
